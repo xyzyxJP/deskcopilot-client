@@ -1,15 +1,28 @@
-import 'package:deskcopilot/socket.dart';
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class Provide extends ChangeNotifier {
-  late Socket _socket;
+  WebSocketChannel? _server;
+  dynamic _dict;
 
-  void connect(String address, int port) {
-    _socket = Socket(address, port);
+  get dict => _dict;
+
+  void initialize(String address, int port) {
+    _server = WebSocketChannel.connect(Uri.parse('ws://$address:$port'));
+    _server?.stream.listen((event) => receiveMessage(event));
+    sendMessage('layouts');
   }
 
-  void refresh() {
-    _socket.sendMessage('refresh');
+  void receiveMessage(String message) {
+    _dict = json.decode(message);
     notifyListeners();
+  }
+
+  void sendMessage(String message) => _server?.sink.add(message);
+
+  void refresh() {
+    sendMessage('layouts');
   }
 }
