@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -31,11 +32,32 @@ class _LayoutState extends State<Layout> {
   }
 
   Widget _buildButton(BuildContext context, int index) {
+    num x = index % widget.dict['Width'];
+    num y = index == 0 ? 0 : (index / widget.dict['Width']).floor();
+    dynamic button = widget.dict['Buttons'][y][x];
+
     return OutlinedButton(
-      onPressed: () {},
-      child: Text(widget.dict['Buttons']
-              [index == 0 ? 0 : (index / widget.dict['Width']).floor()]
-          [index % widget.dict['Width']]['Name']),
+      onPressed: () {
+        if (button['Type'] != 1) return;
+        if (kDebugMode) {
+          print('Button pressed: ${button['Name']}');
+        }
+      },
+      onLongPress: () {
+        if (button['Type'] != 2) return;
+        if (kDebugMode) {
+          print('Button long pressed: ${button['Name']}');
+        }
+      },
+      child: Column(
+        children: [
+          Text(button['Name']),
+          Visibility(
+            visible: button['Type'] == 3,
+            child: Text(button['Value']),
+          )
+        ],
+      ),
     );
   }
 }
